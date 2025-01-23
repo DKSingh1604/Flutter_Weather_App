@@ -24,5 +24,16 @@ class WeatherBlocBloc extends Bloc<WeatherBlocEvent, WeatherBlocState> {
         emit(WeatherBlocFailure());
       }
     });
+
+    on<FetchWeatherByCity>((event, emit) async {
+      emit(WeatherBlocLoading());
+      try {
+        WeatherFactory wf = WeatherFactory(API_KEY, language: Language.ENGLISH);
+        Weather weather = await wf.currentWeatherByCityName(event.city);
+        emit(WeatherBlocSuccess(weather));
+      } catch (e) {
+        emit(WeatherBlocFailure());
+      }
+    });
   }
 }

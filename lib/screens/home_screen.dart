@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_x/bloc/weather_bloc_bloc.dart';
+import 'package:get_x/screens/weatherByCity.dart';
 import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,12 +16,60 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final TextEditingController _cityController = TextEditingController();
+
+  Widget getWeatherIcon(int code) {
+    switch (code) {
+      case >= 200 && < 300:
+        return Image.asset(
+          "assets/thunderstorm.png",
+          height: 250,
+        );
+      case >= 300 && < 400:
+        return Image.asset(
+          "assets/drizzle.png",
+          height: 250,
+        );
+      case >= 500 && < 600:
+        return Image.asset(
+          "assets/rain.png",
+          height: 250,
+        );
+      case >= 600 && < 700:
+        return Image.asset(
+          "assets/snow.png",
+          height: 250,
+        );
+      case >= 700 && < 800:
+        return Image.asset(
+          "assets/fog.png",
+          height: 250,
+        );
+      case == 800:
+        return Image.asset(
+          "assets/clear-sky.png",
+          height: 250,
+        );
+      case > 800 && <= 804:
+        return Image.asset(
+          "assets/cloud.png",
+          height: 250,
+        );
+      default:
+        return Image.asset(
+          "assets/clear-sky.png",
+          height: 250,
+        );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
+        toolbarHeight: 70,
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -79,6 +128,40 @@ class _HomeScreenState extends State<HomeScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            //T E X T F I E L D
+                            TextField(
+                              controller: _cityController,
+                              style: TextStyle(color: Colors.black),
+                              decoration: InputDecoration(
+                                label: Text("City Name"),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    Icons.search,
+                                    color: Colors.white,
+                                  ),
+                                  onPressed: () {
+                                    if (_cityController.text.isNotEmpty) {
+                                      BlocProvider.of<WeatherBlocBloc>(context)
+                                          .add(
+                                        FetchWeatherByCity(
+                                            _cityController.text),
+                                      );
+
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => WeatherByCity(),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 10),
                             Row(
                               children: [
                                 // L O C A T I O N
@@ -106,10 +189,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             Padding(
                               //I M A G E
                               padding: const EdgeInsets.all(17.0),
-                              child: Image.asset(
-                                "assets/rain.png",
-                                height: 250,
-                              ),
+                              child: getWeatherIcon(
+                                  state.weather.weatherConditionCode!),
                             ),
                             Center(
                               // T E M P E R A T U R E
