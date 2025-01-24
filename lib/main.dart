@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_x/bloc/weather_bloc_bloc.dart';
 import 'package:get_x/screens/home_screen.dart';
-import 'package:get_x/screens/weatherByCity.dart';
 
 void main() {
   runApp(const MyApp());
@@ -53,11 +52,8 @@ class MyApp extends StatelessWidget {
               child: HomeScreen(),
             );
           } else {
-            return Scaffold(
-              backgroundColor: Colors.transparent,
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
+            return CircularProgressIndicator(
+              color: Colors.transparent,
             );
           }
         },

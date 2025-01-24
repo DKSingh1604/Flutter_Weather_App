@@ -4,8 +4,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_x/bloc/weather_bloc_bloc.dart';
-import 'package:get_x/screens/weatherByCity.dart';
 import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _cityController = TextEditingController();
+  bool _isToastShown = false;
 
   Widget getWeatherIcon(int code) {
     switch (code) {
@@ -69,13 +70,42 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        toolbarHeight: 70,
+        title: TextField(
+          controller: _cityController,
+          style: TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            label: Text("City Name"),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                Icons.search,
+                color: Colors.white,
+                size: 40,
+              ),
+              onPressed: () {
+                if (_cityController.text.isNotEmpty) {
+                  setState(() {
+                    _isToastShown = false;
+                  });
+                  BlocProvider.of<WeatherBlocBloc>(context).add(
+                    FetchWeatherByCity(_cityController.text),
+                  );
+
+                  FocusScope.of(context).unfocus();
+                }
+              },
+            ),
+          ),
+        ),
+        toolbarHeight: 80,
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(40, 1.2 * kToolbarHeight, 40, 20),
+          padding: EdgeInsets.fromLTRB(40, 2 * kToolbarHeight, 40, 20),
           child: SizedBox(
             height: MediaQuery.of(context).size.height,
             child: Stack(
@@ -121,46 +151,30 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 BlocBuilder<WeatherBlocBloc, WeatherBlocState>(
                   builder: (context, state) {
-                    if (state is WeatherBlocSuccess) {
+                    //LOADING
+                    if (state is WeatherBlocLoading) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                      //SUCCESS
+                    } else if (state is WeatherBlocSuccess) {
+                      if (!_isToastShown) {
+                        _isToastShown = true;
+                        Fluttertoast.showToast(
+                          msg: "Weather data fetched successfully!",
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.BOTTOM,
+                          backgroundColor: Colors.green,
+                          textColor: Colors.white,
+                        );
+                      }
+
                       return SizedBox(
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            //T E X T F I E L D
-                            TextField(
-                              controller: _cityController,
-                              style: TextStyle(color: Colors.black),
-                              decoration: InputDecoration(
-                                label: Text("City Name"),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                suffixIcon: IconButton(
-                                  icon: Icon(
-                                    Icons.search,
-                                    color: Colors.white,
-                                  ),
-                                  onPressed: () {
-                                    if (_cityController.text.isNotEmpty) {
-                                      BlocProvider.of<WeatherBlocBloc>(context)
-                                          .add(
-                                        FetchWeatherByCity(
-                                            _cityController.text),
-                                      );
-
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => WeatherByCity(),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                ),
-                              ),
-                            ),
                             SizedBox(height: 10),
                             Row(
                               children: [
@@ -219,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             SizedBox(height: 40),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 Row(
                                   children: [
@@ -288,7 +302,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             SizedBox(height: 10),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 Row(
                                   children: [
@@ -351,6 +365,13 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ),
                           ],
+                        ),
+                      );
+                    } else if (state is WeatherBlocFailure) {
+                      return Center(
+                        child: Text(
+                          "City not found!",
+                          style: TextStyle(color: Colors.red),
                         ),
                       );
                     } else {

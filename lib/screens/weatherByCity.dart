@@ -20,26 +20,26 @@ class _WeatherByCityState extends State<WeatherByCity> {
       body: BlocBuilder<WeatherBlocBloc, WeatherBlocState>(
         builder: (context, state) {
           if (state is WeatherBlocLoading) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (state is WeatherBlocSuccess) {
             return Column(
               children: [
                 Text(
                   "${state.weather.areaName}, ${state.weather.country}",
-                  style: TextStyle(color: Colors.white, fontSize: 24),
+                  style: const TextStyle(color: Colors.white, fontSize: 24),
                 ),
                 Text(
                   "${state.weather.temperature!.celsius!.toStringAsFixed(1)}°C",
-                  style: TextStyle(fontSize: 35, color: Colors.white),
+                  style: const TextStyle(fontSize: 35, color: Colors.white),
                 ),
                 Text(
-                  "${state.weather.weatherMain!.toUpperCase()}",
-                  style: TextStyle(fontSize: 22, color: Colors.white),
+                  state.weather.weatherMain!.toUpperCase(),
+                  style: const TextStyle(fontSize: 22, color: Colors.white),
                 ),
               ],
             );
           } else if (state is WeatherBlocFailure) {
-            return Center(
+            return const Center(
               child:
                   Text("City not found!", style: TextStyle(color: Colors.red)),
             );

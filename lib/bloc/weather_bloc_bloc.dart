@@ -30,6 +30,7 @@ class WeatherBlocBloc extends Bloc<WeatherBlocEvent, WeatherBlocState> {
       try {
         WeatherFactory wf = WeatherFactory(API_KEY, language: Language.ENGLISH);
         Weather weather = await wf.currentWeatherByCityName(event.city);
+        print(weather);
         emit(WeatherBlocSuccess(weather));
       } catch (e) {
         emit(WeatherBlocFailure());
