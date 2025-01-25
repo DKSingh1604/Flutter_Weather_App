@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get_x/bloc/weather_bloc_bloc.dart';
+import 'package:get_x/data/city_list.dart';
 import 'package:intl/intl.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -18,6 +19,29 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final TextEditingController _cityController = TextEditingController();
   bool _isToastShown = false;
+  List<String> _filteredCities = [];
+
+  void _filterCities(String query) {
+    setState(() {
+      _filteredCities = cityList
+          .where((city) => city.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
+
+  String getGreetingMessage(DateTime date) {
+    int hour = date.hour;
+
+    if (hour >= 3 && hour <= 12) {
+      return " a Morning";
+    } else if (hour >= 12 && hour <= 17) {
+      return " an Afternoon";
+    } else if (hour >= 17 && hour <= 20) {
+      return " an Evening";
+    } else {
+      return " a Night";
+    }
+  }
 
   Widget getWeatherIcon(int code) {
     switch (code) {
@@ -71,11 +95,15 @@ class _HomeScreenState extends State<HomeScreen> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: TextField(
+          onChanged: _filterCities,
           controller: _cityController,
           style: TextStyle(color: Colors.white),
           decoration: InputDecoration(
-            label: Text("City Name"),
+            label: Text("Enter City Name.."),
+            labelStyle:
+                TextStyle(color: const Color.fromARGB(255, 154, 151, 151)),
             border: OutlineInputBorder(
+              borderSide: BorderSide.none,
               borderRadius: BorderRadius.circular(12),
             ),
             suffixIcon: IconButton(
@@ -88,6 +116,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (_cityController.text.isNotEmpty) {
                   setState(() {
                     _isToastShown = false;
+                    _filteredCities.clear();
                   });
                   BlocProvider.of<WeatherBlocBloc>(context).add(
                     FetchWeatherByCity(_cityController.text),
@@ -99,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-        toolbarHeight: 80,
+        toolbarHeight: 90,
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -138,7 +167,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: 300,
                     width: 600,
                     decoration: BoxDecoration(
-                      // shape: BoxShape.circle,
                       color: Color(0xFFFFAB40),
                     ),
                   ),
@@ -185,19 +213,32 @@ class _HomeScreenState extends State<HomeScreen> {
                                   color: Colors.red,
                                 ),
                                 SizedBox(width: 10),
-                                Text(
-                                  "${state.weather.areaName}, ${state.weather.country}",
-                                  style: TextStyle(color: Colors.white),
+                                Container(
+                                  decoration: BoxDecoration(
+                                      color: Colors.black54,
+                                      borderRadius: BorderRadius.circular(10)),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      "${state.weather.areaName}, ${state.weather.country}",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
                             SizedBox(height: 10),
 
                             //G R E E T I N G
-                            Text(
-                              "Good Morning",
-                              style:
-                                  TextStyle(fontSize: 25, color: Colors.white),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                "Good Day",
+                                style: TextStyle(
+                                  fontSize: 25,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                             SizedBox(height: 10),
                             Padding(
